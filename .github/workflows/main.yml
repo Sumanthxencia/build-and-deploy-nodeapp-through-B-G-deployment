@@ -43,6 +43,9 @@ jobs:
       - name: Login to ACR
         run: az acr login --name ${{ secrets.ACR_NAME }}
         shell: bash 
+      - name: Set execute permissions for script
+        run: chmod +x ./infra/set-params.sh
+        shell: bash
 
     # Set params based on the existing app deployment
       - name: Set params
