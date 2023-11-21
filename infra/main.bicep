@@ -35,10 +35,26 @@ param latestCommitId string = ''
 @description('Name of the label that gets 100% of the traffic')
 param productionLabel string = 'blue'
 
-@description('ACR token')
-param acrToken string
-
 var currentCommitId = !empty(latestCommitId) ? latestCommitId : blueCommitId
+
+resource containerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
+  name: 'managedId'
+  location: location
+}
+
+var roleDefinitionID = '7f951dda-4ed3-4680-a7ca-43fe172d538d' // AcrPull
+var roleAssignmentName= guid (roleDefinitionID, resourceGroup ().id)
+
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: roleAssignmentName
+  scope: resourceGroup ()
+  properties: {
+    description: 'AcrPull'
+    principalId: containerIdentity.properties.principalId
+    roleDefinitionId: resourceId ('Microsoft.Authorization/roleDefinitions', roleDefinitionID)
+    principalType: 'ServicePrincipal'
+  }
+}
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
   name: containerAppsEnvironmentName
@@ -47,6 +63,12 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01'
 resource blueGreenDeploymentApp 'Microsoft.App/containerApps@2022-11-01-preview' = {
   name: appName
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${containerIdentity.id}': {}
+    }
+  }
   tags: {
     blueCommitId: blueCommitId
     greenCommitId: greenCommitId
@@ -98,10 +120,6 @@ resource blueGreenDeploymentApp 'Microsoft.App/containerApps@2022-11-01-preview'
             {
               name: 'REVISION_COMMIT_ID'
               value: currentCommitId
-            }
-            {
-              name: 'acrbgdtoken'
-              value: acrToken
             }
           ]
         }
