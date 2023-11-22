@@ -66,7 +66,7 @@ jobs:
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./infra/main.bicep
           deploymentName: deploy-${{ steps.params.outputs.commit_id }}
-          parameters: 'appName=${{ secrets.AZURE_APP_NAME }} blueCommitId=${{ steps.params.outputs.blue_commit_id }} greenCommitId=${{ steps.params.outputs.green_commit_id }} latestCommitId=${{ steps.params.outputs.commit_id }} productionLabel=${{ steps.params.outputs.cur_prod_label }} containerAppsEnvironmentName=${{ secrets.AZURE_ENVIRONMENT_NAME }} githubSHA=${{ github.sha }}'
+          parameters: 'appName=${{ secrets.AZURE_APP_NAME }} blueCommitId=${{ steps.params.outputs.blue_commit_id }} greenCommitId=${{ steps.params.outputs.green_commit_id }} latestCommitId=${{ steps.params.outputs.commit_id }} productionLabel=${{ steps.params.outputs.cur_prod_label }} containerAppsEnvironmentName=${{ secrets.AZURE_ENVIRONMENT_NAME }}'
           deploymentMode: Incremental
           failOnStdErr: true
        # Deactivate the revision that is not green or blue anymore
