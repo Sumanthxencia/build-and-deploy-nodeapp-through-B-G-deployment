@@ -11,10 +11,6 @@ param appName string
 @description('Container environment name')
 param containerAppsEnvironmentName string
 
-@maxLength(64)
-@description('GitHub SHA')
-param githubSHA string
-
 @minLength(1)
 @maxLength(64)
 @description('CommitId for blue revision')
