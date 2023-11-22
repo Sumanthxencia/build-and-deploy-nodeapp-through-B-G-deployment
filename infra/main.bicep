@@ -37,25 +37,6 @@ param productionLabel string = 'blue'
 
 var currentCommitId = !empty(latestCommitId) ? latestCommitId : blueCommitId
 
-resource containerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: 'managedId'
-  location: location
-}
-
-var roleDefinitionID = '7f951dda-4ed3-4680-a7ca-43fe172d538d' // AcrPull
-var roleAssignmentName= guid (roleDefinitionID, resourceGroup ().id)
-
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: roleAssignmentName
-  scope: resourceGroup ()
-  properties: {
-    description: 'AcrPull'
-    principalId: containerIdentity.properties.principalId
-    roleDefinitionId: resourceId ('Microsoft.Authorization/roleDefinitions', roleDefinitionID)
-    principalType: 'ServicePrincipal'
-  }
-}
-
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01' existing = {
   name: containerAppsEnvironmentName
 }
@@ -63,12 +44,6 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-03-01'
 resource blueGreenDeploymentApp 'Microsoft.App/containerApps@2022-11-01-preview' = {
   name: appName
   location: location
-  identity: {
-    type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${containerIdentity.id}': {}
-    }
-  }
   tags: {
     blueCommitId: blueCommitId
     greenCommitId: greenCommitId
@@ -110,7 +85,7 @@ resource blueGreenDeploymentApp 'Microsoft.App/containerApps@2022-11-01-preview'
         {
           // in the real deployment the image would reference the actual commit id tag, for example:
           // image: 'k8seteste2e.azurecr.io/e2e-apps/test-app:${currentCommitId}'
-          image: 'acrfornode.azurecr.io/nodeapp2:${githubSHA}'
+          image: 'acrfornode.azurecr.io/nodeapp2:latest'
           name: appName
           resources: {
             cpu: json('0.5')
@@ -122,6 +97,16 @@ resource blueGreenDeploymentApp 'Microsoft.App/containerApps@2022-11-01-preview'
               value: currentCommitId
             }
           ]
+   secrets: [
+        {
+          name: 'ACR_USERNAME'
+          value: 'acrfornode'
+        }
+        {
+          name: 'ACR_PASSWORD'
+          value: 'obSEQ+gHWgsnwdx6NTE1wWBb/V4T01ngZwLfPZ1FZy+ACRCe+foZ'
+        }
+      ]
         }
       ]
     }
