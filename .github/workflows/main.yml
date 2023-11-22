@@ -29,12 +29,12 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t acrfornode.azurecr.io/nodeapp2:${{ github.sha }} .
+          docker build -t acrfornode.azurecr.io/nodeapp2:latest .
         working-directory: ./
 
       - name: Push Docker image to Azure Container Registry
         run: |
-          docker push acrfornode.azurecr.io/nodeapp2:${{ github.sha }}
+          docker push acrfornode.azurecr.io/nodeapp2:latest
         working-directory: ./
         # Login into Azure
       - uses: azure/login@v1
